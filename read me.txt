@@ -1,0 +1,7 @@
+This was a junior design project by:
+Matthew Dwyer
+Richard Saganey
+Ben Tinelli
+
+In CSE 398, Embedded and Mobile Systems Laboratory, with Dr. Marcy. Spring 2019 Syracuse University.
+All code is free to use and the lab report has been included with the code.

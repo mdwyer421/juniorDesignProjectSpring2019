@@ -1,0 +1,83 @@
+#include <IRremote.h>
+#include <Servo.h> 
+
+Servo updown;
+Servo leftright;
+
+const int ir= 7;
+IRrecv irrecv(ir);
+decode_results results;
+
+int input=0;
+int vpos=90;
+int hpos=90;
+
+void setup(){
+  Serial.begin(9600);
+  irrecv.enableIRIn();
+  irrecv.blink13(true);
+  leftright.attach(9);
+  updown.attach(10);
+  updown.write(90);
+  leftright.write(90);
+}
+
+
+
+void loop(){
+  if (irrecv.decode(&results)){
+        Serial.println(results.value, DEC);//
+        input=(results.value);
+        Serial.println(input);
+        moveCam();
+        irrecv.resume();
+        //delay(600);
+        }
+}
+
+
+
+
+
+void moveCam(){
+  if(input==16625743)//down
+          {
+          if(vpos<180){
+            vpos+=10;
+            updown.write(vpos);
+            return;
+            }
+          }//end down
+        
+  else if(input==16621663)//up
+          {
+          if(vpos>0){
+            vpos-=10;
+            updown.write(vpos);
+            return;
+          }
+          }//end up
+  else if(input==16584943)//left
+         {
+          if(hpos<180){
+            hpos+=10;
+            leftright.write(hpos);
+            return;
+            }
+          }//end left
+        
+  else if(input==16601263)//right
+          {
+          if(hpos>0){
+            hpos-=10;
+            leftright.write(hpos);
+            return;
+            }
+           }//end right
+   else if(input==16617583){
+    updown.write(90);
+    leftright.write(90);
+    hpos=90;
+    vpos=90;
+    }
+  }

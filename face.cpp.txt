@@ -1,0 +1,173 @@
+#include <iostream> 
+#include <opencv2/highgui/highgui.hpp> 
+#include <opencv2/objdetect/objdetect.hpp> 
+#include <opencv2/imgproc/imgproc.hpp> 
+#include <fcntl.h> 
+#include <unistd.h> 
+#include <termios.h> 
+#include <string.h> 
+#include <string> 
+#include <stdlib.h> 
+#include "RPi.cpp" 
+#include <chrono> 
+#include <time.h> 
+using namespace std; 
+using namespace std::chrono; 
+using namespace cv; 
+#define FALSE 0 
+#define TRUE 1 
+ 
+ 
+int main(int argc, char *args[]) 
+{    
+   
+//start the span prevention timer 
+//auto start = system_clock::now(); 
+//double emailTime = system_clock::now()+60; 
+ 
+ 
+//clock_t currentTime =time(0); //timer starts at zero 
+//double timerTime = difftime(time(0), currentTime);//time that has past since the program has started 
+//double emailTime = 1.00; 
+ 
+ 
+ while(1){ 
+//cout << "The current time is " << endl; 
+//cout << currentTime  << endl; 
+  Mat frame; 
+  VideoCapture *capture;  // capture needs full scope of main(), using ptr 
+  cout << "Starting face detection" << endl; 
+  string point=""; 
+  if(argc==2){  // loading image from a file 
+     cout << "Loading the image " << args[1] << endl; 
+ 	frame = imread(args[1], CV_LOAD_IMAGE_COLOR); 
+  } 
+  else { 
+     cout << "Capturing from the webcam" << endl; 
+ 	capture = new VideoCapture(0); 
+ 	// set any  properties in the VideoCapture object 
+ 	capture->set(CV_CAP_PROP_FRAME_WIDTH,1280);   // width pixels 
+ 	capture->set(CV_CAP_PROP_FRAME_HEIGHT,720);   // height pixels 
+ 	if(!capture->isOpened()){   // connect to the camera 
+        cout << "Failed to connect to the camera." << endl; 
+    	return 1; 
+ 	} 
+ 	*capture >> frame;	// populate the frame with captured image 
+     cout << "Successfully captured a frame." << endl; 
+  } 
+  if (!frame.data){ 
+     cout << "Invalid image data... exiting!" << endl; 
+ 	return 1; 
+  } 
+  // loading the face classifier from a file (standard OpenCV example) 
+  CascadeClassifier faceCascade; 
+  faceCascade.load("haarcascade_frontalface.xml"); 
+ 
+ 
+  // faces is a STL vector of faces - will store the detected faces 
+  std::vector<Rect> faces; 
+  // detect objects in the scene using the classifier above (frame,  
+   
+  faceCascade.detectMultiScale(frame, faces, 1.1, 3, 
+                 	0 | CV_HAAR_SCALE_IMAGE, Size(50,50)); 
+  if(faces.size()==0){ 
+     cout << "No faces detected!" << endl; 	// display the image 
+//test code remove later 
+//imwrite("capturetest.png",frame); 
+ 
+ 
+  } 
+  // draw oval around the detected faces in the faces vector 
+   
+  int recsize=0; 
+   
+  if(faces.size()==1){ 
+ 	for(int i=0; i<faces.size(); i++) 
+ 	{ 
+    	// Using the center point and a rectangle to create an ellipse 
+    	Point cent(faces[i].x+faces[i].width*0.5,  
+               	faces[i].y+faces[i].height*0.5); 
+        RotatedRect rect(cent, Size(faces[i].width,faces[i].width),0); 
+    	// image, rectangle, color=green, thickness=3, linetype=8 
+    	ellipse(frame, rect, Scalar(0,255,0), 3, 8); 
+    	//cout << "Face at: (" << faces[i].x << "," <<faces[i].y << ")" << endl; 
+        cout << "face detected" << endl; 
+ 
+ 
+ //       cout << "The face is at: (" << faces[i].x+faces[i].width*0.5<< "," <<faces[i].y+faces[i].height*0.5<< ")" << endl; 
+ 
+ 
+//now we need spam prevention,use a timer to prevent this 
+//timer code:: 
+ 
+ 
+ 
+//auto start = system_clock::now(); 
+//double emailTime = system_clock::now();+50; 
+ 
+ 
+//if(timerTime >= emailTime /*timer is above a certain value */){//time to send an email 
+//code to take a picture 
+imwrite("capturetest.png",frame); 
+        cout <<"Picture taken " << endl; 
+ 
+ 
+ 
+        cout << "sending Email"<< endl; 
+//code to send an email 
+system("mpack -s \"test\" capturetest.png rpi.camera.project@gmail.com"); 
+ 
+ 
+ 
+//simple sleep to prevent spam emails 
+usleep(100000000); 
+ 
+ 
+ 
+//Now the email is sent we need to restart the system timer 
+//timerTime = time(0); 
+//} 
+//else{//if the timer is not above that value, do nothing 
+ 
+ 
+ 
+//auto start = system_clock::now(); 
+//double emailTime = system_clock::now();+60; 
+ 
+ 
+//} 
+ 
+ 
+        recsize=faces[i].width * faces[i].height; 
+    	int widpoint=faces[i].x+faces[i].width*0.5; 
+    	int htpoint=faces[i].y+faces[i].height*0.5; 
+         
+    	if (widpoint<1000)point+="0"; 
+    	if (widpoint<100)point+="0"; 
+    	if (widpoint<10)point+="0"; 
+    	point+=to_string(widpoint)+" "; 
+    	if (htpoint<1000)point+="0"; 
+    	if (htpoint<100)point+="0"; 
+    	if (htpoint<10)point+="0"; 
+    	point+=to_string(htpoint); 
+         
+ 	} 
+      
+     imwrite("faceOutput.png", frame);     
+      
+      
+ 	if (recsize>=50000){ 
+        RPi *r1=new RPi(point); 
+    	string r1m=r1->GetPacket(); 
+   	// const char *c1=r1m.c_str(); 
+ 	} 
+  } 
+  capture->release(); 
+  delete capture; 
+                       
+   
+ } 
+  //End while(1) loop 
+   
+  return 0; 
+} 

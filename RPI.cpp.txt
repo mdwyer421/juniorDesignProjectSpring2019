@@ -1,0 +1,44 @@
+#include <stdio.h> 
+#include <string.h> 
+#include <string> 
+#include <iostream> 
+using namespace std; 
+class RPi{ 
+public: 
+RPi(string m){ 
+Data=m; 
+length_data_int=m.length(); 
+combination=Header; 
+string zero="0"; 
+if(length_data_int<100){combination+=zero;} 
+if(length_data_int<10){combination+=zero;} 
+combination=combination+to_string(length_data_int)+Data; 
+int sum=0; 
+for(int j=0;j<combination.length();j++){ 
+sum+=combination.at(j); 
+}  
+checksum=sum%256; 
+combination_real=combination; 
+if(checksum<100){combination_real+=zero;} 
+if(checksum<10){combination_real+=zero;} 
+combination_real=combination_real+to_string(checksum)+"\n"; 
+} 
+void SetChecksum(int i){ 
+string zero="0"; 
+combination_real=combination; 
+if(i<100){combination_real+=zero;} 
+if(i<10){combination_real+=zero;} 
+combination_real=combination_real+to_string(i)+"\n";//might be atoi (i) 
+} 
+string GetPacket(){ 
+return combination_real; 
+} 
+~RPi(); 
+private: 
+string Header="RPi"; 
+string Data; 
+int length_data_int; 
+string combination; 
+int checksum; 
+string combination_real; 
+}; 
